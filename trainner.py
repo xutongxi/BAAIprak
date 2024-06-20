@@ -13,6 +13,7 @@ class Trainer():
                  lr: float = 1e-4, betas=(0.9, 0.999), with_cuda=True, cuda_devices=None, log_freq: int=10):
         # test if cuda could be used
         cuda_condition = torch.cuda.is_available() and with_cuda
+        print(f'CUDA available: {cuda_condition}')
         self.device = torch.device("cuda:0" if cuda_condition else "cpu")
         # upload model to device
         self.model = GEN.to(self.device)
@@ -38,12 +39,13 @@ class Trainer():
                               total=len(self.train_data),
                               bar_format="{l_bar}{r_bar}")
         for i, data in data_iter:
-            # if isinstance(data, dict):
-            #     data = {key: value.to(self.device) for key, value in data.items()}
-            # else:
-            #     print(f"Unexpected data format at index {i}: {data}")
-            #     continue
-            data = {key: value.to(self.device) for key, value in data.items()}
+            if isinstance(data, dict):
+                data = {key: value.to(self.device) for key, value in data.items()}
+            else:
+                print(f"Unexpected data format at index {i}: {data}")
+                continue
+            # data = {key: value.to(self.device) for key, value in data.items()}
+            print(type(data.values()))
             tensor_u1 = torch.zeros(data["adj_tensor1"].size(1), self.model.embedding_size).to(self.device)
             tensor_u2 = torch.zeros_like(tensor_u1).to(self.device)
             attribute_vector1 = self.model.forward(data["adj_tensor1"], data["attr_tensor1"], tensor_u1)

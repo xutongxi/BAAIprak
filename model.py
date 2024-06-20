@@ -13,6 +13,7 @@ class DepthEmbeddingNetwork(nn.Module):
         self.linearW1 = nn.Linear(vector_size, embedding_size)
         self.linear_blockP = nn.ModuleList([nn.Linear(embedding_size, embedding_size) for _ in range(embedded_depth - 1)])
         self.linear_add_p = nn.Linear(embedding_size, embedding_size)
+        # self._initialize_weights()
 
     def forward(self, attr_tensor, adj_tensor, tensor_u):
         # adj_tensor = torch.transpose(attr_tensor,0, 1)
@@ -24,7 +25,13 @@ class DepthEmbeddingNetwork(nn.Module):
         tensor_u = F.tanh(influence_x + tensor_u)
         return tensor_u
 
-
+    # def _initialize_weights(self):
+    #     for m in self.modules():
+    #         if isinstance(m, nn.Linear):
+    #             nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+    #     for m in self.linear_blockP:
+    #         if isinstance(m, nn.Linear):
+    #             nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
 class GraphEmbeddingNetwork(nn.Module):
     def __init__(self, spread_times, embedded_depth, vector_size, embedding_size):
         super(GraphEmbeddingNetwork, self).__init__()
