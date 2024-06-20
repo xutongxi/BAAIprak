@@ -35,9 +35,9 @@ def custom_collate_fn(batch):
         padding = [0] * 4
         padding[1] = target_shape[1] - tensor.shape[1]
         padding[3] = target_shape[0] - tensor.shape[0]
-        print(padding, tensor.shape)
+        # print(padding, tensor.shape)
         resul = F.pad(tensor, padding, "constant", 0)
-        print(target_shape, resul.shape)
+        # print(target_shape, resul.shape)
         return resul
 
     # 找到每个张量的最大形状
@@ -45,6 +45,7 @@ def custom_collate_fn(batch):
     for key in batch[0].keys():
         if isinstance(batch[0][key], torch.Tensor) and batch[0][key].dim() > 0:
             max_shape[key] = [max(item[key].shape[i] for item in batch) for i in range(len(batch[0][key].shape))]
+            print(key, batch[0][key].shape)
         else:
             print(key, batch[0][key].shape)
 
@@ -70,7 +71,7 @@ def custom_collate_fn(batch):
     #     else:
     #         padded_tensors = [pad_tensor(item[key], max_shape[key]) for item in batch]
     #         collated_batch[key] = torch.stack(padded_tensors, dim=0)
-
+    assert batch[0]['adj_tensor1'].size(0) == batch[0]['attr_tensor1'].size(0)
     return collated_batch
 
 # 示例用法

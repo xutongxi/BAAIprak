@@ -36,6 +36,7 @@ class GraphEmbeddingNetwork(nn.Module):
     def __init__(self, spread_times, embedded_depth, vector_size, embedding_size):
         super(GraphEmbeddingNetwork, self).__init__()
         self.spread_times = spread_times
+        self.embedding_size = embedding_size
         self.spreads_network = DepthEmbeddingNetwork(embedded_depth, vector_size, embedding_size)
         self.linearW2 = nn.Linear(embedding_size, embedding_size)
 
