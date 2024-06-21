@@ -11,7 +11,7 @@ import lossfunction
 
 class Trainer():
     def __init__(self, GEN: model.GraphEmbeddingNetwork, GENdataLoader: DataLoader, test_dataloader: DataLoader = None,
-                 lr: float = 1e-4, betas=(0.9, 0.999), with_cuda=True, cuda_devices=None, log_freq: int=10):
+                 lr: float = 1e-4, betas=(0.9, 0.999), with_cuda=True, cuda_devices=None, log_freq: int=5):
         # test if cuda could be used
         cuda_condition = torch.cuda.is_available() and with_cuda
         print(f'CUDA available: {cuda_condition}')
@@ -46,7 +46,7 @@ class Trainer():
                 print(f"Unexpected data format at index {i}: {data}")
                 continue
             # data = {key: value.to(self.device) for key, value in data.items()}
-            print(type(data.values()))
+            # print(type(data.values()))
             tensor_u1 = torch.zeros(batch_size, data["adj_tensor1"].size(1), self.model.embedding_size).to(self.device)
             tensor_u2 = torch.zeros(batch_size, data["adj_tensor2"].size(1), self.model.embedding_size).to(self.device)
             # print(tensor_u1.shape)
@@ -57,6 +57,13 @@ class Trainer():
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
+            post_fix = {
+                "epoch": epoch,
+                "iter": i,
+                "loss:": loss.item()
+            }
+            if i % self.log_freq == 0:
+                data_iter.write(str(post_fix))
 
     def save(self, epoch, file_path="output/bert_trained.model"):
         """
@@ -71,3 +78,30 @@ class Trainer():
         self.model.to(self.device)
         print("EP:%d Model Saved on:" % epoch, output_path)
         return output_path
+
+    def test(self, epoch, batch_size=10):
+        data_iter = tqdm.tqdm(enumerate(self.test_data),
+                              desc="EP_%s:%d" % ("train", epoch),
+                              total=len(self.test_data),
+                              bar_format="{l_bar}{r_bar}")
+        for i, data in data_iter:
+            if isinstance(data, dict):
+                data = {key: value.to(self.device) for key, value in data.items()}
+            else:
+                print(f"Unexpected data format at index {i}: {data}")
+                continue
+            tensor_u1 = torch.zeros(batch_size, data["adj_tensor1"].size(1), self.model.embedding_size).to(self.device)
+            tensor_u2 = torch.zeros(batch_size, data["adj_tensor2"].size(1), self.model.embedding_size).to(self.device)
+            attribute_vector1 = self.model.forward(data["attr_tensor1"], data["adj_tensor1"], tensor_u1)
+            attribute_vector2 = self.model.forward(data["attr_tensor2"], data["adj_tensor2"], tensor_u2)
+            loss = self.criterion.forward(attribute_vector1, attribute_vector2, data["label"])
+            post_fix = {
+                "epoch": epoch,
+                "iter": i,
+                "loss:": loss.item()
+            }
+            if i % self.log_freq == 0:
+                data_iter.write(str(post_fix))
+
+    def load_model(self, file_path):
+        self.model.load_state_dict(torch.load(file_path))

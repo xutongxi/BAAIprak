@@ -45,7 +45,7 @@ def custom_collate_fn(batch):
     for key in batch[0].keys():
         if isinstance(batch[0][key], torch.Tensor) and batch[0][key].dim() > 0:
             max_shape[key] = [max(item[key].shape[i] for item in batch) for i in range(len(batch[0][key].shape))]
-            print(max_shape[key])
+            # print(max_shape[key])
         # else:
             # print(key, batch[0][key].shape)
 
