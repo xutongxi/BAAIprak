@@ -15,7 +15,7 @@ embedding_size = 64
 
 train_dataset = "data/training/matrix_pairs"
 test_dataset = None
-output_path = "parameter/"
+output_path = "output/parameter.model"
 
 print("Creating Dataset")
 train_dataset = dataset.GraphDataset(train_dataset)
