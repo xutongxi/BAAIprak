@@ -65,7 +65,7 @@ class Trainer():
             if i % self.log_freq == 0:
                 data_iter.write(str(post_fix))
 
-    def save(self, epoch, file_path="output/bert_trained.model"):
+    def save(self, epoch, file_path="output/parameter.model"):
         """
         Saving the current model on file_path
 
