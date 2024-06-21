@@ -3,6 +3,7 @@ import torch.nn as nn
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 import tqdm
+import os
 
 import model
 import lossfunction
@@ -32,7 +33,7 @@ class Trainer():
         print("Total Parameters:", sum([p.nelement() for p in self.model.parameters()]))
 
 # epoch指的是目前进行到了第几论，而不是一共要进行第几论
-    def train(self, epoch):
+    def train(self, epoch, batch_size=10):
         # Setting the tqdm progress bar
         data_iter = tqdm.tqdm(enumerate(self.train_data),
                               desc="EP_%s:%d" % ("train", epoch),
@@ -46,8 +47,10 @@ class Trainer():
                 continue
             # data = {key: value.to(self.device) for key, value in data.items()}
             print(type(data.values()))
-            tensor_u1 = torch.zeros(data["adj_tensor1"].size(1), self.model.embedding_size).to(self.device)
-            tensor_u2 = torch.zeros_like(tensor_u1).to(self.device)
+            tensor_u1 = torch.zeros(batch_size, data["adj_tensor1"].size(1), self.model.embedding_size).to(self.device)
+            tensor_u2 = torch.zeros(batch_size, data["adj_tensor2"].size(1), self.model.embedding_size).to(self.device)
+            # print(tensor_u1.shape)
+            # print(tensor_u2.shape)
             attribute_vector1 = self.model.forward(data["attr_tensor1"], data["adj_tensor1"], tensor_u1)
             attribute_vector2 = self.model.forward(data["attr_tensor2"], data["adj_tensor2"], tensor_u2)
             loss = self.criterion.forward(attribute_vector1, attribute_vector2, data["label"])

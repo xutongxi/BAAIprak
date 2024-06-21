@@ -17,6 +17,7 @@ class DepthEmbeddingNetwork(nn.Module):
 
     def forward(self, attr_tensor, adj_tensor, tensor_u):
         # adj_tensor = torch.transpose(attr_tensor,0, 1)
+        print(adj_tensor.shape, tensor_u.shape)
         tensor_u = torch.matmul(adj_tensor, tensor_u)
         for layer in self.linear_blockP:
             tensor_u = F.relu(layer(tensor_u))
@@ -43,6 +44,8 @@ class GraphEmbeddingNetwork(nn.Module):
     def forward(self, attr_tensor, adj_tensor, tensor_u):
         for times in range(self.spread_times):
             tensor_u = self.spreads_network(attr_tensor, adj_tensor, tensor_u)
-        sum_tensor = torch.sum(tensor_u, dim=0)
+        sum_tensor = torch.sum(tensor_u, dim=1)
+        # print(tensor_u.shape, sum_tensor.shape)
+        # print("看一下形状")
         return self.linearW2(sum_tensor)
 
