@@ -103,5 +103,18 @@ class Trainer():
             if i % self.log_freq == 0:
                 data_iter.write(str(post_fix))
 
-    def load_model(self, file_path):
-        self.model.load_state_dict(torch.load(file_path))
+    def load(self, file_path):
+        """
+        Loading the model from file_path
+
+        :param file_path: model input path
+        :return: None
+        """
+        if os.path.exists(file_path):
+            self.model = torch.load(file_path)
+            self.model.to(self.device)
+            if isinstance(self.model, nn.DataParallel):
+                self.model = self.model.module
+            print("Model Loaded from:", file_path)
+        else:
+            raise FileNotFoundError(f"No model found at {file_path}")
